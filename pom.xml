@@ -8,5 +8,15 @@
     <artifactId>programmer-choice</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.piaoniu</groupId>
+            <artifactId>piaoniu-haha</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>/Users/daniel/codes/piaoniu-openSdk/target/piaoniu-openSdk-1.0.Fx1-SNAPSHOT.jar</systemPath>
+        </dependency>
+    </dependencies>
+
 
 </project>
