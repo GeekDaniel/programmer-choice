@@ -1,8 +1,12 @@
 package top.dannystone.test;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -83,9 +87,6 @@ public class GetSession {
 
         }
 
-        sessions.forEach(e -> {
-            System.out.println(JSONObject.toJSONString(e));
-        });
     }
 
 }
