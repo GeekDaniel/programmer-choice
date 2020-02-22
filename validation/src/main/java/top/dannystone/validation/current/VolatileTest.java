@@ -1,4 +1,4 @@
-package top.dannystone.volatileTest;
+package top.dannystone.validation.current;
 
 /**
  * Created with IntelliJ IDEA.

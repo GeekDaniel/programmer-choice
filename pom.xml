@@ -6,6 +6,7 @@
 
     <groupId>top.dannystone</groupId>
     <artifactId>programmer-choice</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <build>
         <plugins>
@@ -19,17 +20,12 @@
             </plugin>
         </plugins>
     </build>
+    <modules>
+        <module>validation</module>
+        <module>DesigningData-Intensive-web-application</module>
+    </modules>
 
     <dependencies>
-        <dependency>
-            <groupId>com.piaoniu</groupId>
-            <artifactId>piaoniu-haha</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>
-                /Users/daniel/codes/piaoniu-opensdk/target/piaoniu-openSdk-1.0-SNAPSHOT-jar-with-dependencies.jar
-            </systemPath>
-        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
