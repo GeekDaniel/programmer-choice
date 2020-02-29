@@ -21,7 +21,7 @@ public class BinaryReadWriteTest {
 
     @Before
     public void init() {
-        absoluteFilePath = "/Users/daniel/Desktop/binary";
+        absoluteFilePath = "/Users/daniel/Desktop/binary2";
     }
 
     @Test
