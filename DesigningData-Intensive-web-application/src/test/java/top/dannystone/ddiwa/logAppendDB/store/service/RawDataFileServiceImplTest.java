@@ -12,18 +12,18 @@ import org.junit.Test;
  * @creed: keep it simple and stupid !
  * @Time: 2020/2/29 9:47 PM
  */
-public class StoreFileServiceImplTest {
-    StoreFileServiceImpl storeFileService = null;
+public class RawDataFileServiceImplTest {
+    RawDataFileServiceImpl storeFileService = null;
 
     @Before
     public void init() {
-        storeFileService = new StoreFileServiceImpl();
+        storeFileService = new RawDataFileServiceImpl();
     }
 
 
     @Test
     public void getFileName() {
-        String fileName = storeFileService.getLastFileName();
+        String fileName = storeFileService.getAbsoluteFileName();
         Assert.assertEquals("1582984369999.raw",fileName );
     }
 }

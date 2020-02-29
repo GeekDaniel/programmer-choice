@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import top.dannystone.ddiwa.logAppendDB.store.BinaryReadWrite;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
@@ -24,7 +24,7 @@ public class RawDataWriteServiceImpl implements RawDataWriteService {
     public static final String CHARSET = "utf-8";
 
     @Autowired
-    private StoreFileService storeFileService;
+    private RawDataFileService rawDataFileService;
 
     private static final char kvSplit = 127;
 
@@ -33,7 +33,7 @@ public class RawDataWriteServiceImpl implements RawDataWriteService {
     @Override
     public void append(String key, String data) {
         //找到文件
-        String fileName = storeFileService.getLastFileName();
+        String fileName = rawDataFileService.getAbsoluteFileName();
 
         //todo 这里jvm锁不支持 scale out
         //获取文件写入锁
@@ -44,8 +44,8 @@ public class RawDataWriteServiceImpl implements RawDataWriteService {
                 byte[] bytes = formatKV(key, data).getBytes(CHARSET);
                 byte[] bytesWithSplit = new byte[bytes.length + 1];
                 System.arraycopy(bytes, 0, bytesWithSplit, 0, bytes.length);
-                bytesWithSplit[bytes.length] = StoreFileService.ENTRYSPLIT;
-                BinaryReadWrite.binaryAppendWrite(fileName, bytesWithSplit);
+                bytesWithSplit[bytes.length] = RawDataFileService.ENTRYSPLIT;
+                binaryAppendWrite(fileName, bytesWithSplit);
             } catch (IOException e) {
                 log.error("binaryAppendWrite fail", e);
                 throw new RuntimeException("binaryAppendWrite fail");
@@ -60,7 +60,7 @@ public class RawDataWriteServiceImpl implements RawDataWriteService {
     @Override
     public String get(String key) {
         //todo 多文件不一定是最新文件
-        String fileName = storeFileService.getLastFileName();
+        String fileName = rawDataFileService.getAbsoluteFileName();
         try (ReversedLinesFileReader fr = new ReversedLinesFileReader(new File(fileName));) {
             String lineKey;
             String lineValue;
@@ -81,6 +81,16 @@ public class RawDataWriteServiceImpl implements RawDataWriteService {
             throw new RuntimeException(e.getMessage());
         }
 
+    }
+
+    private void binaryAppendWrite(String absoluteFilePath, byte[] bytes) throws IOException {
+        File file = new File(absoluteFilePath);
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        try (FileOutputStream fos = new FileOutputStream(file, true)) {
+            fos.write(bytes);
+        }
     }
 
 }

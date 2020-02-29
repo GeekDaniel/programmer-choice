@@ -1,12 +1,11 @@
 package top.dannystone.ddiwa.logAppendDB.store.service;
 
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import top.dannystone.ddiwa.logAppendDB.store.BinaryReadWrite;
 import top.dannystone.ddiwa.logAppendDB.utils.StringUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,7 +16,8 @@ import java.io.IOException;
  * @Time: 2020/2/29 7:41 PM
  */
 @Service
-public class StoreFileServiceImpl implements StoreFileService {
+@Slf4j
+public class RawDataFileServiceImpl implements RawDataFileService {
 
 
     private static int KEY_THRESHOLD_PERFILE = 1024;
@@ -34,7 +34,7 @@ public class StoreFileServiceImpl implements StoreFileService {
     private final String fileDirectory = "/Users/daniel/data/";
 
     @Override
-    public String getLastFileName() {
+    public String getAbsoluteFileName() {
         //如果重新启动服务器 ，需要重新初始化
         if (needInit()) {
             init();
@@ -45,7 +45,7 @@ public class StoreFileServiceImpl implements StoreFileService {
             resetFileTimeStampAndKeyCount();
         }
 
-        return fileDirectory+currentFileTimeStamp + SUFFIX;
+        return fileDirectory + currentFileTimeStamp + SUFFIX;
     }
 
     private void resetFileTimeStampAndKeyCount() {
@@ -58,13 +58,14 @@ public class StoreFileServiceImpl implements StoreFileService {
         return currentFileKeyCount >= KEY_THRESHOLD_PERFILE;
     }
 
-    boolean needInit() {
+    private boolean needInit() {
         if (currentFileTimeStamp == 0L) {
             return true;
         }
         return false;
     }
 
+    //重启数据库需要初始化文件状态
     private void init() {
         String lastFileName = getLastFileNameFromDisk();
         if (StringUtils.isEmpty(lastFileName)) {
@@ -73,12 +74,16 @@ public class StoreFileServiceImpl implements StoreFileService {
         } else {
             currentFileTimeStamp = Long.parseLong(lastFileName.substring(0, lastFileName.indexOf(SUFFIX)));
             try {
-                currentFileKeyCount = BinaryReadWrite.countLines(fileDirectory + lastFileName);
+                currentFileKeyCount = countLines(getAbsoluteFileName(lastFileName));
             } catch (IOException e) {
                 throw new RuntimeException("lastFileName not found!!!");
             }
         }
 
+    }
+
+    private String getAbsoluteFileName(String lastFileName) {
+        return fileDirectory + lastFileName;
     }
 
     /**
@@ -92,6 +97,27 @@ public class StoreFileServiceImpl implements StoreFileService {
                 .filter(e -> e.contains(SUFFIX))
                 .max(String::compareTo)
                 .orElse("");
+    }
+
+    private int countLines(String absoluteFilePath) throws IOException {
+        int count = 0;
+        File file = new File(absoluteFilePath);
+        if (!file.exists()) {
+            throw new FileNotFoundException(absoluteFilePath + "not found!!!");
+        }
+
+        try (BufferedReader bf = new BufferedReader(new FileReader(file));) {
+            String line = null;
+            do {
+
+                line = bf.readLine();
+                if (line != null) {
+                    count++;
+                }
+            } while (line != null);
+
+            return count;
+        }
     }
 
 }

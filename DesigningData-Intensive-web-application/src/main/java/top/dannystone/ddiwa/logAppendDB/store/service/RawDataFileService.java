@@ -8,10 +8,10 @@ package top.dannystone.ddiwa.logAppendDB.store.service;
  * @creed: keep it simple and stupid !
  * @Time: 2020/2/29 7:40 PM
  */
-public interface StoreFileService {
+public interface RawDataFileService {
 
     //todo move to properties file
     char ENTRYSPLIT = '\n';
 
-    String getLastFileName();
+    String getAbsoluteFileName();
 }
