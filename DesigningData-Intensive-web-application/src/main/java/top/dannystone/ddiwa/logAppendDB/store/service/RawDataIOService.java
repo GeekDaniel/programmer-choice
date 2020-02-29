@@ -8,7 +8,7 @@ package top.dannystone.ddiwa.logAppendDB.store.service;
  * @creed: keep it simple and stupid !
  * @Time: 2020/2/25 1:32 AM
  */
-public interface RawDataWriteService {
+public interface RawDataIOService {
 
     void append(String key, String data);
 

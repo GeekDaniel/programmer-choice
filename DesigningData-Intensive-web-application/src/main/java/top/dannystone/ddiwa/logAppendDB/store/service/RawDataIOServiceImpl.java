@@ -19,7 +19,7 @@ import java.io.IOException;
  */
 @Service
 @Slf4j
-public class RawDataWriteServiceImpl implements RawDataWriteService {
+public class RawDataIOServiceImpl implements RawDataIOService {
 
     public static final String CHARSET = "utf-8";
 
