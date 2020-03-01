@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import top.dannystone.ddiwa.logAppendDB.transaction.lock.LockService;
+import top.dannystone.ddiwa.logAppendDB.transaction.lock.enums.LockType;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,23 +63,14 @@ public class LockServiceImpl implements LockService {
     }
 
     private synchronized Object getSameObjectWhenStringEqualsS(String key) {
-        String skey = key + "_S";
-        Object o = keyCache.get(skey);
-        if (o == null) {
-            o = new Object();
-            keyCache.put(skey, o);
-        }
-        return o;
+        String skey = key + "_" + LockType.S;
+        return getSameObjectWhenStringEquals(skey);
     }
 
     private synchronized Object getSameObjectWhenStringEqualsX(String key) {
-        String xkey = key + "_X";
-        Object o = keyCache.get(xkey);
-        if (o == null) {
-            o = new Object();
-            keyCache.put(xkey, o);
-        }
-        return o;
+        String xkey = key + "_" + LockType.X;
+        return getSameObjectWhenStringEquals(xkey);
+
     }
 
     /**
@@ -91,7 +83,7 @@ public class LockServiceImpl implements LockService {
 
         synchronized (keyLock) {
             Set set = xLockRegister.get(key);
-            if (set==null||set.size() == 0) {
+            if (set == null || set.size() == 0) {
                 registerSLock(key);
                 return true;
             }
@@ -113,8 +105,9 @@ public class LockServiceImpl implements LockService {
     }
 
     /**
-     *   获取一个互斥锁
-     *   当前key 有无锁，如果有则获取失败。
+     * 获取一个互斥锁
+     * 当前key 有无锁，如果有则获取失败。
+     *
      * @param key
      * @return
      */
@@ -123,21 +116,21 @@ public class LockServiceImpl implements LockService {
         Object keyLock = getSameObjectWhenStringEqualsX(key);
         synchronized (keyLock) {
             Set sSet = sLockRegister.get(key);
-            if (sSet==null||sSet.size() != 0) {
+            if (sSet == null || sSet.size() != 0) {
                 return false;
             }
 
             Set xSet = xLockRegister.get(key);
-            if (xSet==null||xSet.size() != 0) {
+            if (xSet == null || xSet.size() != 0) {
                 return false;
             }
 
-            if(xSet==null){
+            if (xSet == null) {
                 xSet = Sets.newHashSet();
             }
 
             xSet.add(Thread.currentThread().getId());
-            xLockRegister.put(key,xSet );
+            xLockRegister.put(key, xSet);
 
         }
         return false;
