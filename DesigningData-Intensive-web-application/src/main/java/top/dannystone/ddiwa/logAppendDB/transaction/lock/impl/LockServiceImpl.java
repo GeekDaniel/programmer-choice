@@ -116,12 +116,12 @@ public class LockServiceImpl implements LockService {
         Object keyLock = getSameObjectWhenStringEqualsX(key);
         synchronized (keyLock) {
             Set sSet = sLockRegister.get(key);
-            if (sSet == null || sSet.size() != 0) {
+            if (sSet != null && sSet.size() != 0) {
                 return false;
             }
 
             Set xSet = xLockRegister.get(key);
-            if (xSet == null || xSet.size() != 0) {
+            if (xSet != null && xSet.size() != 0) {
                 return false;
             }
 
@@ -133,7 +133,7 @@ public class LockServiceImpl implements LockService {
             xLockRegister.put(key, xSet);
 
         }
-        return false;
+        return true;
     }
 
     @Override
