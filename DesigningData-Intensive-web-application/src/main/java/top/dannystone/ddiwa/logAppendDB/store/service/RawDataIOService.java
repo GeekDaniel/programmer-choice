@@ -1,5 +1,7 @@
 package top.dannystone.ddiwa.logAppendDB.store.service;
 
+import top.dannystone.ddiwa.logAppendDB.sqlEngine.index.domain.Index;
+
 /**
  * Created with IntelliJ IDEA.
  * Description:
@@ -12,5 +14,9 @@ public interface RawDataIOService {
 
     void append(String key, String data);
 
+    Index appendThenReturnIndex(String key, String data);
+
     String get(String key);
+
+    String getValueArOffsetInFile(String absoluteFileName, int offSet);
 }

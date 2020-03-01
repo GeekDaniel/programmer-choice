@@ -1,8 +1,12 @@
 package top.dannystone.ddiwa.logAppendDB;
 
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.util.Assert;
-import top.dannystone.ddiwa.logAppendDB.store.service.RawDataIOService;
+import top.dannystone.ddiwa.logAppendDB.sqlEngine.index.domain.Index;
+import top.dannystone.ddiwa.logAppendDB.sqlEngine.index.service.IndexService;
+import top.dannystone.ddiwa.logAppendDB.sqlEngine.query.service.QueryService;
+import top.dannystone.ddiwa.logAppendDB.sqlEngine.write.service.WriteService;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,12 +18,18 @@ import top.dannystone.ddiwa.logAppendDB.store.service.RawDataIOService;
  */
 public class DbApplication {
     public static void main(String[] args) {
-        AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext(ServiceConfig.class);
-        RawDataIOService rawService = annotationConfigApplicationContext.getBean(RawDataIOService.class);
-        rawService.append("hello","world" );
-        rawService.append("hello","world2" );
-        String hello = rawService.get("hello");
-        Assert.isTrue("world2".equals(hello),"error" );
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ServiceConfig.class);
+
+        WriteService writeService = context.getBean(WriteService.class);
+        writeService.write("love story", "taylor swift");
+
+        IndexService indexService= context.getBean(IndexService.class);
+        Index love_story = indexService.getIndex("love story");
+        System.out.println(JSONObject.toJSONString(love_story));
+
+        QueryService queryService = context.getBean(QueryService.class);
+        String love_story1 = queryService.get("love story");
+        System.out.println(JSONObject.toJSONString(love_story1));
 
     }
 

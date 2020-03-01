@@ -10,8 +10,10 @@ package top.dannystone.ddiwa.logAppendDB.store.service;
  */
 public interface RawDataFileService {
 
-    //todo move to properties file
+    //系统使用无法配置更改
     char ENTRYSPLIT = '\n';
 
     String getAbsoluteFileName();
+
+    int countLines(String absoluteFilePath) ;
 }

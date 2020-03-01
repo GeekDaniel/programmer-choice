@@ -4,10 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import top.dannystone.ddiwa.logAppendDB.sqlEngine.index.domain.Index;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -53,6 +52,21 @@ public class RawDataIOServiceImpl implements RawDataIOService {
         }
     }
 
+    @Override
+    public Index appendThenReturnIndex(String key, String data) {
+        append(key, data);
+
+        String fileName = rawDataFileService.getAbsoluteFileName();
+        int lines = rawDataFileService.countLines(fileName);
+
+        Index index = new Index();
+        index.setKey(key);
+        index.setOffSet(lines);
+        index.setRawDataFileName(fileName);
+
+        return index;
+    }
+
     private String formatKV(String key, String data) {
         return key + kvSplit + data;
     }
@@ -77,10 +91,29 @@ public class RawDataIOServiceImpl implements RawDataIOService {
             }
             return null;
         } catch (Exception e) {
-            log.error("get file : " + fileName + " error", e);
+            log.error("getValueArOffsetInFile file : " + fileName + " error", e);
             throw new RuntimeException(e.getMessage());
         }
 
+    }
+
+    @Override
+    public String getValueArOffsetInFile(String absoluteFileName, int offSet) {
+        File file = new File(absoluteFileName);
+        if (!file.exists()) {
+            throw new RuntimeException(absoluteFileName + "not found!!!");
+        }
+
+        try (BufferedReader bf = new BufferedReader(new FileReader(file));) {
+            String line = null;
+            for (int i = 0; i < offSet; i++) {
+                line = bf.readLine();
+            }
+            return line.split(kvSplit + "")[0];
+        } catch (Exception e) {
+            log.error("readLine failed", e);
+            throw new RuntimeException("readLine failed");
+        }
     }
 
     private void binaryAppendWrite(String absoluteFilePath, byte[] bytes) throws IOException {

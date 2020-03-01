@@ -16,9 +16,5 @@ import java.io.IOException;
 public class BinaryReadWriteTest {
 
     static final String absoluteFilePath = "/Users/daniel/Desktop/binary";
-    @Test
-    public void countSplits() throws IOException {
-        int count = BinaryReadWrite.countLines(absoluteFilePath);
-        Assert.assertEquals(1,count );
-    }
+
 }

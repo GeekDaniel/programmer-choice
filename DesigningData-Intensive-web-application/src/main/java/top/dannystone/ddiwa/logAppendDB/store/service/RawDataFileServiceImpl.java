@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import top.dannystone.ddiwa.logAppendDB.utils.StringUtils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 
 /**
  * Created with IntelliJ IDEA.
@@ -73,11 +75,7 @@ public class RawDataFileServiceImpl implements RawDataFileService {
             currentFileKeyCount = 0;
         } else {
             currentFileTimeStamp = Long.parseLong(lastFileName.substring(0, lastFileName.indexOf(SUFFIX)));
-            try {
-                currentFileKeyCount = countLines(getAbsoluteFileName(lastFileName));
-            } catch (IOException e) {
-                throw new RuntimeException("lastFileName not found!!!");
-            }
+            currentFileKeyCount = countLines(getAbsoluteFileName(lastFileName));
         }
 
     }
@@ -99,11 +97,12 @@ public class RawDataFileServiceImpl implements RawDataFileService {
                 .orElse("");
     }
 
-    private int countLines(String absoluteFilePath) throws IOException {
+    @Override
+    public int countLines(String absoluteFilePath) {
         int count = 0;
         File file = new File(absoluteFilePath);
         if (!file.exists()) {
-            throw new FileNotFoundException(absoluteFilePath + "not found!!!");
+            throw new RuntimeException(absoluteFilePath + "not found!!!");
         }
 
         try (BufferedReader bf = new BufferedReader(new FileReader(file));) {
@@ -117,6 +116,9 @@ public class RawDataFileServiceImpl implements RawDataFileService {
             } while (line != null);
 
             return count;
+        } catch (Exception e) {
+            log.error("readLine failed", e);
+            throw new RuntimeException("readLine failed");
         }
     }
 
