@@ -15,6 +15,7 @@ import top.dannystone.ddiwa.logAppendDB.transaction.service.TransactionService;
 @Service
 @Slf4j
 public class TransactionServiceImpl implements TransactionService {
+
     @Override
     public void begin() {
 

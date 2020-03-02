@@ -25,6 +25,7 @@ public class LockServiceImplTest {
      * 尝试获取共享锁。
      * case 1 : 如果有其他的共享锁，可成功获得
      * case 2 : 如果有其他的互斥锁，获取失败
+     * case 3 : 如果是本事务持有互斥锁，那么本事务可继续获取共享锁
      */
     @Test
     public void getSLockCase1() {
@@ -123,10 +124,38 @@ public class LockServiceImplTest {
         }
     }
 
+    @Test
+    public void case3() {
+
+        String transactionId = Thread.currentThread().getId() + "" + System.currentTimeMillis();
+        String xLock = lockService.getXLock("hello", transactionId);
+        System.out.println("thread : " + Thread.currentThread().getId() + " get x lock ,success : " + xLock);
+        ;
+
+        String sLock = lockService.getSLock("hello", transactionId);
+        System.out.println("thread : " + Thread.currentThread().getId() + " get s lock ,success : " + sLock);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (!StringUtils.isEmpty(xLock)) {
+            lockService.releaseXLock("hello", xLock);
+            System.out.println("releaseXLock finished : "+xLock);
+        }
+        if (!StringUtils.isEmpty(sLock)) {
+            lockService.releaseSLock("hello", sLock);
+            System.out.println("releaseSLock finished : "+sLock);
+        }
+
+    }
+
+
     /**
      * case1 : 如果没有任何锁，获得成功。
      * case2 ：如果有共享锁，获得失败。
-     * case3 : 如果有互斥锁，获得失败。
+     * case3 : 如果有其他事务的互斥锁，获得失败。
+     * case4 : 如果有本事务持有互斥锁，获得成功。
      */
     @Test
     public void getXLockCase1() {
@@ -240,6 +269,25 @@ public class LockServiceImplTest {
             e.printStackTrace();
         }
 
+    }
+
+    @Test
+    public void getXLockCase4() {
+        String transactionId = Thread.currentThread().getId() + "" + System.currentTimeMillis();
+        String xLock = lockService.getXLock("hello", transactionId);
+        System.out.println("thread : " + Thread.currentThread().getId() + " get x lock ,success : " + xLock);
+        String xLock2 = lockService.getXLock("hello", transactionId);
+        System.out.println("thread : " + Thread.currentThread().getId() + " get x lock ,success : " + xLock2);
+
+        if(!StringUtils.isEmpty(xLock)){
+            lockService.releaseXLock("hello",xLock );
+            System.out.println("releaseXLock successfully");
+        }
+
+        if(!StringUtils.isEmpty(xLock2)){
+            lockService.releaseXLock("hello",xLock2 );
+            System.out.println("releaseXLock successfully");
+        }
     }
 
     @Test
