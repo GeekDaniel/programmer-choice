@@ -2,6 +2,7 @@ package top.dannystone.ddiwa.logAppendDB.transaction.domain;
 
 import lombok.Data;
 import top.dannystone.ddiwa.logAppendDB.sqlEngine.action.SqlAction;
+import top.dannystone.ddiwa.logAppendDB.transaction.lock.domain.Lock;
 
 import java.util.List;
 
@@ -15,8 +16,10 @@ import java.util.List;
  */
 @Data
 public class Transaction {
-    private int threadId;
+    private String transactionId;
     private List<SqlAction> actions;
     private int status;
+
+    private List<Lock> locks;
 
 }

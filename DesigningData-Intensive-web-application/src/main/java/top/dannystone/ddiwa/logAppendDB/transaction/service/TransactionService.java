@@ -1,5 +1,8 @@
 package top.dannystone.ddiwa.logAppendDB.transaction.service;
 
+import top.dannystone.ddiwa.logAppendDB.sqlEngine.action.SqlAction;
+import top.dannystone.ddiwa.logAppendDB.transaction.domain.Transaction;
+
 /**
  * Created with IntelliJ IDEA.
  * Description:
@@ -9,7 +12,11 @@ package top.dannystone.ddiwa.logAppendDB.transaction.service;
  * @Time: 2020/3/1 11:15 PM
  */
 public interface TransactionService {
-    void begin();
+    Transaction begin();
 
-    void commit();
+    void addAction(Transaction transaction, SqlAction sqlAction);
+
+    boolean requireAllLocks(Transaction transaction);
+
+    void commit(Transaction transaction);
 }

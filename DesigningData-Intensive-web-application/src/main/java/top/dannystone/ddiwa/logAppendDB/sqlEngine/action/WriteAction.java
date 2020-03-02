@@ -8,7 +8,8 @@ package top.dannystone.ddiwa.logAppendDB.sqlEngine.action;
  * @creed: keep it simple and stupid !
  * @Time: 2020/3/2 12:44 AM
  */
-public interface WriteSqlAction<T> extends SqlAction<T> {
+public interface WriteAction<T> extends SqlAction<T> {
+
     boolean commit();
 
     boolean rollBack();

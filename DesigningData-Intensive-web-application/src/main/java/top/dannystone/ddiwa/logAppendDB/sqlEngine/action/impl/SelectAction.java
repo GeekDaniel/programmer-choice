@@ -1,5 +1,8 @@
 package top.dannystone.ddiwa.logAppendDB.sqlEngine.action.impl;
 
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,6 +21,8 @@ import top.dannystone.ddiwa.logAppendDB.sqlEngine.query.service.QueryService;
 @Component
 @Slf4j
 public class SelectAction implements SqlAction<String> {
+    @Getter
+    @Setter
     private String key;
 
     @Autowired

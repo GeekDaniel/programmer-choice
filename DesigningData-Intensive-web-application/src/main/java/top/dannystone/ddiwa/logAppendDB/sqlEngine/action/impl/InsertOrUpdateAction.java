@@ -1,9 +1,11 @@
 package top.dannystone.ddiwa.logAppendDB.sqlEngine.action.impl;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import top.dannystone.ddiwa.logAppendDB.sqlEngine.action.WriteSqlAction;
+import top.dannystone.ddiwa.logAppendDB.sqlEngine.action.WriteAction;
 import top.dannystone.ddiwa.logAppendDB.sqlEngine.write.service.WriteService;
 
 /**
@@ -16,8 +18,13 @@ import top.dannystone.ddiwa.logAppendDB.sqlEngine.write.service.WriteService;
  */
 @Component
 @Slf4j
-public class InsertSqlAction implements WriteSqlAction<Integer> {
+public class InsertOrUpdateAction implements WriteAction<Integer> {
+    @Getter
+    @Setter
     String key;
+
+    @Getter
+    @Setter
     String value;
     @Autowired
     private WriteService writeService;

@@ -1,5 +1,8 @@
 package top.dannystone.ddiwa.logAppendDB.transaction.lock;
 
+import top.dannystone.ddiwa.logAppendDB.transaction.lock.domain.SLock;
+import top.dannystone.ddiwa.logAppendDB.transaction.lock.domain.XLock;
+
 /**
  * Created with IntelliJ IDEA.
  * Description:
@@ -10,9 +13,9 @@ package top.dannystone.ddiwa.logAppendDB.transaction.lock;
  */
 public interface LockService {
 
-    String getSLock(String key,String transactionId);
+    SLock getSLock(String key, String transactionId);
 
-    String getXLock(String key,String transactionId);
+    XLock getXLock(String key, String transactionId);
 
     void releaseSLock(String key, String transactionId);
 

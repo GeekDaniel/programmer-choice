@@ -4,6 +4,8 @@ import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import top.dannystone.ddiwa.logAppendDB.transaction.lock.LockService;
+import top.dannystone.ddiwa.logAppendDB.transaction.lock.domain.SLock;
+import top.dannystone.ddiwa.logAppendDB.transaction.lock.domain.XLock;
 import top.dannystone.ddiwa.logAppendDB.transaction.lock.enums.LockType;
 
 import java.util.Optional;
@@ -79,11 +81,11 @@ public class LockServiceImpl implements LockService {
      * 当前key 有无互斥锁，如果有则获取失败。
      */
     @Override
-    public String getSLock(String key, String transactionId) {
+    public SLock getSLock(String key, String transactionId) {
         //如果本事务已经有Slock 则返回
         Set<String> sLocks = sLockRegister.get(key);
-        if (sLocks!=null&&sLocks.contains(transactionId)) {
-            return transactionId;
+        if (sLocks != null && sLocks.contains(transactionId)) {
+            return new SLock(transactionId, key);
         }
 
         Object keyLock = getSameObjectWhenStringEqualsS(key);
@@ -92,11 +94,11 @@ public class LockServiceImpl implements LockService {
             //如果没有互斥锁||或者互斥锁是本事务申请的
             if (set == null || set.size() == 0 || set.contains(transactionId)) {
                 registerSLock(key, transactionId);
-                return transactionId;
+                return new SLock(transactionId, key);
             }
         }
 
-        return "";
+        return null;
     }
 
     private void registerSLock(String key, String transactionId) {
@@ -119,12 +121,12 @@ public class LockServiceImpl implements LockService {
      * @return
      */
     @Override
-    public String getXLock(String key, String transactionId) {
+    public XLock getXLock(String key, String transactionId) {
 
         //如果本事务已经有xlock 则返回
         Set xSet = xLockRegister.get(key);
-        if (xSet!=null&&xSet.contains(transactionId)) {
-            return transactionId;
+        if (xSet != null && xSet.contains(transactionId)) {
+            return new XLock(transactionId, key);
         }
 
         Object keyLock = getSameObjectWhenStringEqualsX(key);
@@ -137,7 +139,7 @@ public class LockServiceImpl implements LockService {
                         .filter(e -> !e.equals(transactionId))
                         .findAny();
                 if (any.isPresent()) {
-                    return "";
+                    return null;
                 }
             }
 
@@ -147,11 +149,11 @@ public class LockServiceImpl implements LockService {
                         .filter(e -> !e.equals(transactionId))
                         .findAny();
                 if (any.isPresent()) {
-                    return "";
+                    return null;
                 }
             }
             registerXLock(key, xSet, transactionId);
-            return transactionId;
+            return new XLock(transactionId, key);
         }
     }
 
