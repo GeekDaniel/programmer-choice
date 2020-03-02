@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import top.dannystone.ddiwa.logAppendDB.transaction.lock.LockService;
 import top.dannystone.ddiwa.logAppendDB.transaction.lock.enums.LockType;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,11 +37,11 @@ public class LockServiceImpl implements LockService {
 
     /**
      * key format
-     * Key Set<threadId>
+     * Key Set<transactionId>
      */
-    private static final ConcurrentHashMap<String, Set> sLockRegister = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Set<String>> sLockRegister = new ConcurrentHashMap<>();
 
-    private static final ConcurrentHashMap<String, Set> xLockRegister = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Set<String>> xLockRegister = new ConcurrentHashMap<>();
 
     private static final ConcurrentHashMap<String, Object> keyCache = new ConcurrentHashMap<>();
 
@@ -78,28 +79,34 @@ public class LockServiceImpl implements LockService {
      * 当前key 有无互斥锁，如果有则获取失败。
      */
     @Override
-    public boolean getSLock(String key) {
-        Object keyLock = getSameObjectWhenStringEqualsS(key);
+    public String getSLock(String key, String transactionId) {
+        //如果本事务已经有Slock 则返回
+        Set<String> sLocks = sLockRegister.get(key);
+        if (sLocks!=null&&sLocks.contains(transactionId)) {
+            return transactionId;
+        }
 
+        Object keyLock = getSameObjectWhenStringEqualsS(key);
         synchronized (keyLock) {
             Set set = xLockRegister.get(key);
-            if (set == null || set.size() == 0) {
-                registerSLock(key);
-                return true;
+            //如果没有互斥锁||或者互斥锁是本事务申请的
+            if (set == null || set.size() == 0 || set.contains(transactionId)) {
+                registerSLock(key, transactionId);
+                return transactionId;
             }
         }
 
-        return false;
+        return "";
     }
 
-    private void registerSLock(String key) {
+    private void registerSLock(String key, String transactionId) {
 
         synchronized (key) {
             Set sLocksInKey = sLockRegister.get(key);
             if (sLocksInKey == null) {
                 sLocksInKey = Sets.newHashSet();
             }
-            sLocksInKey.add(Thread.currentThread().getId());
+            sLocksInKey.add(transactionId);
             sLockRegister.put(key, sLocksInKey);
         }
     }
@@ -112,38 +119,67 @@ public class LockServiceImpl implements LockService {
      * @return
      */
     @Override
-    public boolean getXLock(String key) {
+    public String getXLock(String key, String transactionId) {
+
+        //如果本事务已经有xlock 则返回
+        Set xSet = xLockRegister.get(key);
+        if (xSet!=null&&xSet.contains(transactionId)) {
+            return transactionId;
+        }
+
         Object keyLock = getSameObjectWhenStringEqualsX(key);
         synchronized (keyLock) {
-            Set sSet = sLockRegister.get(key);
+            Set<String> sSet = sLockRegister.get(key);
+
+            //如果存在共享读锁,并且非本事务独占，那么申请不成功
             if (sSet != null && sSet.size() != 0) {
-                return false;
+                Optional<String> any = sSet.stream()
+                        .filter(e -> !e.equals(transactionId))
+                        .findAny();
+                if (any.isPresent()) {
+                    return "";
+                }
             }
 
-            Set xSet = xLockRegister.get(key);
+            //如果存在互斥锁，并且非本事务独占，那么申请不成功
             if (xSet != null && xSet.size() != 0) {
-                return false;
+                Optional any = xSet.stream()
+                        .filter(e -> !e.equals(transactionId))
+                        .findAny();
+                if (any.isPresent()) {
+                    return "";
+                }
             }
-
-            if (xSet == null) {
-                xSet = Sets.newHashSet();
-            }
-
-            xSet.add(Thread.currentThread().getId());
-            xLockRegister.put(key, xSet);
-
+            registerXLock(key, xSet, transactionId);
+            return transactionId;
         }
-        return true;
+    }
+
+    private void registerXLock(String key, Set xSet, String transactionId) {
+        if (xSet == null) {
+            xSet = Sets.newHashSet();
+        }
+
+        xSet.add(transactionId);
+        xLockRegister.put(key, xSet);
     }
 
     @Override
-    public void releaseSLock(String key) {
-        sLockRegister.get(key).remove(Thread.currentThread().getId());
+    public void releaseSLock(String key, String transactionId) {
+        Set<String> lockHolders = sLockRegister.get(key);
+        if (!lockHolders.contains(transactionId)) {
+            return;
+        }
+        lockHolders.remove(transactionId);
     }
 
     @Override
-    public void releaseXLock(String key) {
-        xLockRegister.get(key).remove(Thread.currentThread().getId());
+    public void releaseXLock(String key, String transactionId) {
+        Set<String> lockHolders = xLockRegister.get(key);
+        if (!lockHolders.contains(transactionId)) {
+            return;
+        }
+        lockHolders.remove(transactionId);
     }
 
 

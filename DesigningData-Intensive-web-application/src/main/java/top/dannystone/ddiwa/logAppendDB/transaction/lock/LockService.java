@@ -10,12 +10,12 @@ package top.dannystone.ddiwa.logAppendDB.transaction.lock;
  */
 public interface LockService {
 
-    boolean getSLock(String key);
+    String getSLock(String key,String transactionId);
 
-    boolean getXLock(String key);
+    String getXLock(String key,String transactionId);
 
-    void releaseSLock(String key);
+    void releaseSLock(String key, String transactionId);
 
-    void releaseXLock(String key);
+    void releaseXLock(String key, String transactionId);
 }
 

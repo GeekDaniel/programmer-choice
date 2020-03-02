@@ -3,6 +3,7 @@ package top.dannystone.ddiwa.logAppendDB.transaction.lock.impl;
 import org.junit.Before;
 import org.junit.Test;
 import top.dannystone.ddiwa.logAppendDB.transaction.lock.LockService;
+import top.dannystone.ddiwa.logAppendDB.utils.StringUtils;
 
 /**
  * Created with IntelliJ IDEA.
@@ -29,32 +30,40 @@ public class LockServiceImplTest {
     public void getSLockCase1() {
 
         Thread thread = new Thread(() -> {
-            boolean success = lockService.getSLock("hello");
-            System.out.println("thread : " + Thread.currentThread().getId() + " get s lock ,success : " + success);
+            String transactionId = Thread.currentThread().getId()+""+System.currentTimeMillis();
+            String sLock = lockService.getSLock("hello", transactionId);
+            System.out.println("thread : " + Thread.currentThread().getId() + " get s lock ,success : " + sLock);
             ;
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            lockService.releaseSLock("hello");
+            if (!StringUtils.isEmpty(transactionId)) {
+                lockService.releaseSLock("hello", transactionId);
+            }
             System.out.println("releaseSLock finished");
 
         });
         thread.start();
 
+
+
         Thread thread2 = new Thread(() -> {
-            boolean success = lockService.getSLock("hello");
-            System.out.println("thread : " + Thread.currentThread().getId() + " get s lock ,success : " + success);
+            String transactionId = Thread.currentThread().getId()+""+System.currentTimeMillis();
+            String sLock = lockService.getSLock("hello", transactionId);
+            System.out.println("thread : " + Thread.currentThread().getId() + " get s lock ,success : " + sLock);
             ;
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            lockService.releaseSLock("hello");
-
+            if (!StringUtils.isEmpty(transactionId)) {
+                lockService.releaseSLock("hello", transactionId);
+            }
             System.out.println("releaseSLock finished");
+
         });
         thread2.start();
 
@@ -68,42 +77,38 @@ public class LockServiceImplTest {
 
     @Test
     public void getSLockCase2() {
-
         Thread thread = new Thread(() -> {
-            boolean success = lockService.getXLock("hello");
-            System.out.println("thread : " + Thread.currentThread().getId() + " get x lock ,success : " + success);
+
+            String transactionId = Thread.currentThread().getId()+""+System.currentTimeMillis();
+            String hello = lockService.getXLock("hello", transactionId);
+            System.out.println("thread : " + Thread.currentThread().getId() + " get x lock ,success : " + hello);
             ;
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if(success){
-                lockService.releaseXLock("hello");
+            if(!StringUtils.isEmpty(hello)){
+                lockService.releaseXLock("hello",transactionId);
                 System.out.println("releaseXLock finished");
             }
 
         });
         thread.start();
 
+
         Thread thread2 = new Thread(() -> {
             try {
-                Thread.sleep(100);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            String transactionId = Thread.currentThread().getId()+""+System.currentTimeMillis();
+            String sLock = lockService.getSLock("hello", transactionId);
+            System.out.println("thread : " + Thread.currentThread().getId() + " get s lock ,success : " + sLock);
 
-            boolean success = lockService.getSLock("hello");
-            System.out.println("thread : " + Thread.currentThread().getId() + " get s lock ,success : " + success);
-            ;
-
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (success) {
-                lockService.releaseSLock("hello");
+            if (!StringUtils.isEmpty(sLock)) {
+                lockService.releaseSLock("hello", sLock);
                 System.out.println("releaseSLock finished");
             }
 
@@ -132,31 +137,33 @@ public class LockServiceImplTest {
     @Test
     public void getXLockCase2() {
         Thread thread = new Thread(() -> {
-            boolean success = lockService.getSLock("hello");
-            System.out.println("thread : " + Thread.currentThread().getId() + " get s lock ,success : " + success);
+            String transactionId = Thread.currentThread().getId()+""+System.currentTimeMillis();
+            String sLock = lockService.getSLock("hello", transactionId);
+            System.out.println("thread : " + Thread.currentThread().getId() + " get s lock ,success : " + sLock);
             ;
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if(success){
-                lockService.releaseSLock("hello");
-                System.out.println("releaseXLock finished");
+            if(!StringUtils.isEmpty(sLock)){
+                lockService.releaseSLock("hello",transactionId);
+                System.out.println("releasexLock finished");
             }
 
         });
         thread.start();
 
         Thread thread2 = new Thread(() -> {
+            String transactionId = Thread.currentThread().getId()+""+System.currentTimeMillis();
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-            boolean success = lockService.getXLock("hello");
-            System.out.println("thread : " + Thread.currentThread().getId() + " get x lock ,success : " + success);
+            String hello = lockService.getXLock("hello", transactionId);
+            System.out.println("thread : " + Thread.currentThread().getId() + " get x lock ,success : " + hello);
             ;
 
             try {
@@ -164,8 +171,8 @@ public class LockServiceImplTest {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (success) {
-                lockService.releaseXLock("hello");
+            if (!StringUtils.isEmpty(hello)) {
+                lockService.releaseXLock("hello",hello);
                 System.out.println("releaseSLock finished");
             }
 
@@ -184,16 +191,17 @@ public class LockServiceImplTest {
     @Test
     public void getXLockCase3() {
         Thread thread = new Thread(() -> {
-            boolean success = lockService.getXLock("hello");
-            System.out.println("thread : " + Thread.currentThread().getId() + " get x lock ,success : " + success);
+            String transactionId = Thread.currentThread().getId()+""+System.currentTimeMillis();
+            String xLock = lockService.getXLock("hello", transactionId);
+            System.out.println("thread : " + Thread.currentThread().getId() + " get x lock ,success : " + xLock);
             ;
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if(success){
-                lockService.releaseXLock("hello");
+            if(!StringUtils.isEmpty(xLock)){
+                lockService.releaseXLock("hello",xLock);
                 System.out.println("releaseXLock finished");
             }
 
@@ -207,8 +215,9 @@ public class LockServiceImplTest {
                 e.printStackTrace();
             }
 
-            boolean success = lockService.getXLock("hello");
-            System.out.println("thread : " + Thread.currentThread().getId() + " get x lock ,success : " + success);
+            String transactionId = Thread.currentThread().getId()+""+System.currentTimeMillis();
+            String xLock = lockService.getXLock("hello", transactionId);
+            System.out.println("thread : " + Thread.currentThread().getId() + " get x lock ,success : " + xLock);
             ;
 
             try {
@@ -216,8 +225,8 @@ public class LockServiceImplTest {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (success) {
-                lockService.releaseXLock("hello");
+            if (!StringUtils.isEmpty(xLock)) {
+                lockService.releaseXLock("hello",xLock);
                 System.out.println("releaseSLock finished");
             }
 
