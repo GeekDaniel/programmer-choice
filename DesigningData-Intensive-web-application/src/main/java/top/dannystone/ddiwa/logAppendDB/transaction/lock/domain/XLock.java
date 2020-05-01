@@ -9,8 +9,13 @@ package top.dannystone.ddiwa.logAppendDB.transaction.lock.domain;
  * @Time: 2020/3/2 11:59 PM
  */
 public class XLock extends Lock {
-    public XLock(String transactionId, String key) {
+
+    public XLock(String key,String transactionId) {
         this.setKey(key);
         this.setTransactionId(transactionId);
+    }
+
+    public boolean notLocked() {
+        return this.getTransactionId() == null;
     }
 }

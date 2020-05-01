@@ -10,8 +10,13 @@ package top.dannystone.ddiwa.logAppendDB.transaction.lock.domain;
  */
 public class SLock extends Lock {
 
-    public SLock(String transactionId, String key) {
+    public SLock(String key, String transactionId) {
         this.setTransactionId(transactionId);
         this.setKey(key);
+    }
+
+    @Override
+    public int hashCode() {
+        return (this.getKey() + "_" + this.getTransactionId()).hashCode();
     }
 }
